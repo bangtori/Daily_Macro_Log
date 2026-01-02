@@ -1,0 +1,38 @@
+name: Daily Macro Log
+
+on:
+  schedule:
+    # 🌎 시간 설정 (UTC 기준이라 한국 시간 -9시간 해야 함)
+
+    # 1. 한국 아침 08:30 = UTC 전날 23:30
+    - cron: "30 23 * * *"
+
+    # 2. 한국 오후 16:00 = UTC 당일 07:00
+    - cron: "0 7 * * *"
+
+  workflow_dispatch: # 수동 실행 버튼 (테스트용)
+
+jobs:
+  run-dashboard:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 저장소 체크아웃 (코드 가져오기)
+        uses: actions/checkout@v3
+
+      - name: 파이썬 설정 (Python 3.9)
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: 라이브러리 설치 (requirements.txt 사용)
+        run: |
+          pip install -r requirements.txt
+
+      - name: 파이썬 스크립트 실행
+        # 👇 깃허브 금고(Secrets)에서 꺼내서 환경변수로 넣어주는 곳
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+        run: |
+          python DailyMacroLog.py
